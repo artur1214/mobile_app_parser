@@ -69,7 +69,7 @@ async def parse_urls(url: str | list[str]):
 
 
 async def main():
-    res = await parse_urls('https://play.google.com/store/search?q=sport&c=apps')
+    res = await parse_urls('https://play.google.com/store/search?q=sport&c=apps&hl=en')
     app_results = []
     proceed = []
     print(f'finded {len(res)} elements to parse')
