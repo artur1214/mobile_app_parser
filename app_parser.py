@@ -44,12 +44,15 @@ def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
 
 async def get_app_info(app_id: str, lang: str = "en", country: str = "us"):
     url = formats.detail.build(app_id, lang, country)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            #print(resp.status)
-            if resp.status == 404:
-                return None
-            res = await resp.text()
-    if not res:
+    try:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(connect=10)) as session:
+            async with session.get(url) as resp:
+                if resp.status == 404:
+                    return None
+                res = await resp.text()
+        if not res:
+            return None
+        print('got app', app_id)
+        return parse_dom(res, app_id, url)
+    except aiohttp.ClientError:
         return None
-    return parse_dom(res, app_id, url)

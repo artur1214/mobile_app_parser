@@ -7,11 +7,17 @@ def unescape_text(s):
     return unescape(s.replace("<br>", "\r\n"))
 
 
-def nested_lookup(source, indexes):
+def nested_lookup(source, indexes, none_on_error=False):
     """Recursive nested_lookup. (never reaches recursive deep. must be ok.)"""
-    if len(indexes) == 1:
-        return source[indexes[0]]
-    return nested_lookup(source[indexes[0]], indexes[1::])
+    try:
+        if len(indexes) == 1:
+            return source[indexes[0]]
+        return nested_lookup(source[indexes[0]], indexes[1::])
+    except (TypeError, IndexError) as exc:
+        if none_on_error:
+            return None
+        else:
+            raise exc
 
 
 class ElementSpec:
@@ -182,5 +188,6 @@ class ElementSpecs:
         "description": ElementSpec(None, [0, 13, 1], unescape_text),
         "descriptionHTML": ElementSpec(None, [0, 13, 1]),
         "developer": ElementSpec(None, [0, 14]),
-        "installs": ElementSpec(None, [0, 15])
+        "installs": ElementSpec(None, [0, 15]),
+
     }
