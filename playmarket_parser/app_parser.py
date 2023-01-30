@@ -2,9 +2,9 @@ from typing import Any
 
 import aiohttp
 
-import formats
-import specs
-import utils
+from . import formats
+from . import specs
+from . import utils
 
 
 def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
