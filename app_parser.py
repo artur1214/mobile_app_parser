@@ -1,26 +1,14 @@
-import json
 from typing import Any
 
 import aiohttp
 
 import formats
-import regexes
 import specs
+import utils
 
 
 def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
-    matches = regexes.SCRIPT.findall(dom)
-    dataset = {}
-    for match in matches:
-        key_match = regexes.KEY.findall(match)
-        value_match = regexes.VALUE.findall(match)
-
-        if key_match and value_match:
-            key = key_match[0]
-            value = json.loads(value_match[0])
-
-            dataset[key] = value
-
+    dataset = utils.parse_dataset_dom(dom)
     result = {}
 
     for k, spec in specs.ElementSpecs.Detail.items():
@@ -45,14 +33,9 @@ def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
 async def get_app_info(app_id: str, lang: str = "en", country: str = "us"):
     url = formats.detail.build(app_id, lang, country)
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(connect=10)) as session:
-            async with session.get(url) as resp:
-                if resp.status == 404:
-                    return None
-                res = await resp.text()
+        res = await utils.get_page(url, 10, 404)
         if not res:
             return None
-        print('got app', app_id)
         return parse_dom(res, app_id, url)
     except aiohttp.ClientError:
         return None

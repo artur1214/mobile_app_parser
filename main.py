@@ -1,17 +1,23 @@
+import csv
 import json
+import os
 import re
-from typing import Any
+import sys
+from pprint import pprint
+from typing import Any, TextIO
 
 import aiohttp as aiohttp
 
 import asyncio
 from urllib.parse import quote
 
+import dotenv
 from _jsonnet import evaluate_snippet
 
 import formats
 import regexes
 import specs
+import utils
 from app_parser import get_app_info
 
 
@@ -32,11 +38,7 @@ async def create_link(query_string, n_hits: int = 30, lang: str = "en",
     return url
 
 
-async def get_dom(url):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            res = await resp.text()
-            return res
+
 
 
 def parse_service_data(dom):
@@ -84,16 +86,11 @@ async def check_finished(saved_apps: list[dict[str, Any]] | None,
           f'rpcids=qnKhOb&f.sid=-697906427155521722&bl=boq_playuiserver' \
           f'_20190903.08_p0&hl={opts.get("lang")}&gl={opts.get("country")}' \
           f'&authuser&soc-app=121&soc-platform=1&soc-device=1&_reqid=1065213'
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=body, headers={
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-        }) as resp:
-            # print(resp.request_info.headers)
-            res = await resp.text()
-            data = process_data(res)
-            if not data:
-                return saved_apps or []
-            return await process_pages(data, saved_apps)
+    res = await utils.post_page(url, body)
+    data = process_data(res)
+    if not data:
+        return saved_apps or []
+    return await process_pages(data, saved_apps)
 
 
 MAPPINGS = {
@@ -152,22 +149,30 @@ async def process_pages(data, saved_apps, opts=None):
     token = specs.nested_lookup(data, [0, 0, 7], True)
     return await check_finished([*saved_apps, *app_list], token)
 
+def save_json_to_csv(data: list[dict[str, Any]], file: TextIO):
+    """Saves json data into csv file. or stream
+
+        Args:
+            data (list[dict]): list with data to save
+            file (TextIO): IO object (file, tokenstream, etc.)
+             with 'write' method
+    """
+    # TODO: old way with pandas. must be removed.
+    # df = pd.DataFrame(data)
+    # df.to_csv('res.csv')
+    # print(df)
+    output = csv.writer(file)
+    output.writerow(data[0].keys())  # header row
+    for row in data:
+        output.writerow(row.values())
+
 
 async def parse_urls(url: str | list[str]):
     n_hits = 250
 
-    dom = await get_dom(url)
+    dom = await utils.get_page(url)
     service_data = parse_service_data(dom)
-    matches = regexes.SCRIPT.findall(dom)
-    dataset = {}
-    for match in matches:
-        key_match = regexes.KEY.findall(match)
-        value_match = regexes.VALUE.findall(match)
-
-        if key_match and value_match:
-            key = key_match[0]
-            value = json.loads(value_match[0])
-            dataset[key] = value
+    dataset = utils.parse_dataset_dom(dom)
     success = False
     res_dataset = dataset
     # different idx for different countries and languages
@@ -176,7 +181,7 @@ async def parse_urls(url: str | list[str]):
             # json.dump(dataset, open('dataset.json', 'w+'))
             dataset = dataset["ds:4"][0][1][idx][22][0]
             success = True
-        except Exception:
+        except Exception as _exc:
             pass
     if not success:
         return []
@@ -194,19 +199,18 @@ async def parse_urls(url: str | list[str]):
     token = specs.nested_lookup(more_section, [22, 1, 3, 1], True)
     return await check_finished(search_results, token)
 
+if __name__ == '__main__':
+    async def main():
+        res = await parse_urls(
+            'https://play.google.com/store/search?q=minecraft&c=apps')
+        print(f'finded {len(res)} elements to parse')
+        coroutines = []
+        for app in res:
+            coroutines.append(get_app_info(app.get('appId')))
+        parsed = await asyncio.gather(*coroutines)
+        parsed = list(filter(None, parsed))
+        json.dump(parsed, open('main.json', 'w+'))
+        print(f'successfully parsed {len(parsed)} elements')
+        save_json_to_csv(parsed, open('result.csv', 'w+'))
 
-async def main():
-    res = await parse_urls(
-        'https://play.google.com/store/search?q=music&c=apps')
-    print(f'finded {len(res)} elements to parse')
-    coroutines = []
-    for app in res:
-        # threading.Thread(target=asyncio.run, args=(load_app_info(app),)).start()
-        coroutines.append(get_app_info(app.get('appId')))
-    parsed = await asyncio.gather(*coroutines)
-    parsed = list(filter(None, parsed))
-    json.dump(parsed, open('main.json', 'w+'))
-    print(f'successfully parsed {len(parsed)} elements')
-
-
-asyncio.run(main())
+    asyncio.run(main())
