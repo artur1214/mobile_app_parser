@@ -1,4 +1,3 @@
-import asyncio
 import io
 
 import aiohttp_jinja2
@@ -25,9 +24,9 @@ class IndexView(web.View):
             try:
                 res = await parse_from_url(link)
                 stream = io.StringIO()
-                file_json = save_json_to_csv(res, stream)
+                save_json_to_csv(res, stream)
                 return web.Response(text=stream.getvalue())
-                #return web.json_response(res)
+                # return web.json_response(res)
             except Exception as e:
                 return web.Response(text=str(e))
 

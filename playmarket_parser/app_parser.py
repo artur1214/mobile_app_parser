@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 import aiohttp
@@ -5,6 +6,7 @@ import aiohttp
 from . import formats
 from . import specs
 from . import utils
+from . import datasafety
 
 
 def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
@@ -31,11 +33,15 @@ def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
 
 
 async def get_app_info(app_id: str, lang: str = "en", country: str = "us"):
+    print('parsed')
     url = formats.detail.build(app_id, lang, country)
     try:
         res = await utils.get_page(url, 10, 404)
         if not res:
             return None
-        return parse_dom(res, app_id, url)
+        res = parse_dom(res, app_id, url)
+        res['datasafety'] = await datasafety.get_app_safety_data(app_id, lang)
+        return res
     except aiohttp.ClientError:
         return None
+
