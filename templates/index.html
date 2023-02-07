@@ -8,12 +8,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('link_sender_form')
         const a = document.getElementById('download_link')
+        const btn = document.getElementById('send_btn')
         form.addEventListener('submit', (evt) => {
             evt.preventDefault();
             a.style.display = 'none';
             //console.log(evt)
             (async () => {
                 const data = new FormData(evt.target)
+                //document.getElementById('send_btn')
+                btn.disabled = true;
                 const resp = await fetch("{{ current_host }}", {
                     method: 'POST',
                     body: data
@@ -22,6 +25,7 @@
 
                 a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}))
                 a.style.display = 'block';
+                btn.disabled = true;
             })().then()
         })
 
@@ -37,7 +41,7 @@
                    placeholder="Enter link to process">
             <small id="linkHelp" class="form-text text-muted"><b>Example: </b>https://play.google.com/store/search?q=minecraft&c=apps</small>
         </div>
-        <button class="btn btn-primary">Send to parser</button>
+        <button id="send_btn" class="btn btn-primary">Send to parser</button>
     </form>
     <a class="btn-link" style="display: none" href="" id="download_link" download="results.csv">Download</a>
 </div>

@@ -1,11 +1,12 @@
 import io
+import urllib.parse
 
 import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 
 from playmarket_parser import parse_from_url, save_json_to_csv
-
+from appstore_parser import parse as parse_apple
 routes = web.RouteTableDef()
 
 
@@ -22,7 +23,14 @@ class IndexView(web.View):
         data = await self.request.post()
         if link := data.get('link'):
             try:
-                res = await parse_from_url(link)
+                host = urllib.parse.urlparse(link).netloc
+                if 'apple.' in host:
+                    res = await parse_apple(link)
+                # result = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+                elif 'play.google' in host:
+                    res = await parse_from_url(link)
+                else:
+                    res = []
                 stream = io.StringIO()
                 save_json_to_csv(res, stream)
                 return web.Response(text=stream.getvalue())
