@@ -9,8 +9,8 @@ from urllib.parse import quote
 from _jsonnet import evaluate_snippet
 from typing.io import IO
 
-from playmarket_parser import formats, utils, specs, regexes
-from playmarket_parser.app_parser import get_app_info
+from . import formats, utils, specs, regexes
+from .app_parser import get_app_info
 
 PLAY_STORE_BASE_URL = "https://play.google.com"
 
@@ -110,25 +110,13 @@ MAPPINGS = {
 }
 
 
-def extract_data_from_app(el):
-    res = {}
-    for key, spec_value in MAPPINGS.items():
-        if isinstance(spec_value, list):
-            res[key] = specs.nested_lookup(el, spec_value, True)
-        else:
-            res[key] = spec_value['fun'](
-                specs.nested_lookup(el, spec_value['path'], True))
-
-    return res
-
-
 def extract_app_list(data):
     data = specs.nested_lookup(data, [0, 0, 0])
     res = []
     if not data:
         return []
     for el in data:
-        res.append(extract_data_from_app(el))
+        res.append(utils.extract_data_from_app(el, MAPPINGS))
     return res
 
 
@@ -189,14 +177,22 @@ async def parse_urls(url: str | list[str]):
     return await check_finished(search_results, token)
 
 
-async def parse_from_url(url: str, stream_to: IO| None = None):
+async def parse_from_url(url: str, stream_to: IO | None = None):
     res = await parse_urls(url)
-    print(f'finded {len(res)} elements to parse')
+    print(f'found {len(res)} elements to parse')
     coroutines = []
     for app in res:
         coroutines.append(get_app_info(app.get('appId')))
     parsed = await asyncio.gather(*coroutines)
     parsed = list(filter(None, parsed))
-    #print(f'successfully parsed {len(parsed)} elements')
+    # print(successfully parsed {len(parsed)} elements')
 
     return parsed
+
+
+if __name__ == '__main__':
+    async def main():
+        res = await parse_from_url('https://play.google.com/store/search?q=sport&c=apps')
+        save_json_to_csv(res, open('main_test.csv', 'w+'))
+        json.dump(res, open('main_test.json', 'w+'))
+    asyncio.run(main())

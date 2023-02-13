@@ -5,6 +5,7 @@ import aiohttp
 import dotenv
 
 from . import regexes
+from . import specs
 
 dotenv.load_dotenv()
 # PROXY_URL = os.environ.get('PROXY_URL')
@@ -15,6 +16,18 @@ dotenv.load_dotenv()
 #     PROXY_USER, PROXY_PASS) if PROXY_AUTH_NEEDED else None
 
 PROXY_ENABLED = bool(int(os.environ.get('PROXY_ENABLED', 0)))
+
+
+def extract_data_from_app(el, mappings):
+    res = {}
+    for key, spec_value in mappings.items():
+        if isinstance(spec_value, list):
+            res[key] = specs.nested_lookup(el, spec_value, True)
+        else:
+            res[key] = spec_value['fun'](
+                specs.nested_lookup(el, spec_value['path'], True))
+    return res
+
 
 async def get_page(url: str,
                    timeout: int | None = None, none_on: int | list[int] = None):
@@ -56,7 +69,6 @@ async def post_page(url, data):
         }) as resp:
             res = await resp.text()
             return res
-
 
 def parse_dataset_dom(dom: str):
     """Parses main dataset from dom. (from script tags)"""
