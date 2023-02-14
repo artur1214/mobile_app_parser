@@ -7,6 +7,9 @@ from aiohttp import web
 
 from playmarket_parser import parse_from_url, save_json_to_csv
 from appstore_parser import parse as parse_apple
+from chrome_parser import parse as chrome_parse
+
+
 routes = web.RouteTableDef()
 
 
@@ -30,12 +33,14 @@ class IndexView(web.View):
                 elif 'play.google' in host:
                     res = await parse_from_url(link)
                 else:
-                    res = []
+                    res = await chrome_parse(link)
+
                 stream = io.StringIO()
                 save_json_to_csv(res, stream)
                 return web.Response(text=stream.getvalue())
                 # return web.json_response(res)
             except Exception as e:
+                print('error!', e)
                 return web.Response(text=str(e))
 
 

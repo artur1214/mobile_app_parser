@@ -9,6 +9,28 @@ dotenv.load_dotenv()
 PROXY_ENABLED = bool(int(os.environ.get('PROXY_ENABLED', 0)))
 
 
+def extract_data_from_app(el, mappings):
+    res = {}
+    for key, spec_value in mappings.items():
+        if isinstance(spec_value, list):
+            res[key] = nested_lookup(el, spec_value, True)
+        else:
+            res[key] = spec_value['fun'](
+                nested_lookup(el, spec_value['path'], True))
+    return res
+
+def nested_lookup(source, indexes, none_on_error=False):
+    """Recursive nested_lookup. (never reaches recursive deep. must be ok.)"""
+    try:
+        if len(indexes) == 1:
+            return source[indexes[0]]
+        return nested_lookup(source[indexes[0]], indexes[1::])
+    except (TypeError, IndexError) as exc:
+        if none_on_error:
+            return None
+        else:
+            raise exc
+
 
 async def get_page(url: str,
                    timeout: int | None = None, none_on: int | list[int] = None):
