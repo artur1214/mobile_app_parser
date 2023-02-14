@@ -17,6 +17,7 @@
                 const data = new FormData(evt.target)
                 //document.getElementById('send_btn')
                 btn.disabled = true;
+                a.style.display = 'none';
                 const resp = await fetch("{{ current_host }}", {
                     method: 'POST',
                     body: data
@@ -25,7 +26,7 @@
 
                 a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}))
                 a.style.display = 'block';
-                btn.disabled = true;
+                btn.disabled = false;
             })().then()
         })
 
