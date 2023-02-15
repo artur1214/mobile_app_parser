@@ -4,4 +4,3 @@ __pycache__
 .env
 *.csv
 *.json
-gitlab-ci.yml
