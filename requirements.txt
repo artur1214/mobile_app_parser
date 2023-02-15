@@ -1,7 +1,7 @@
 aiohttp==3.8.3
 
 #jsonnet==0.19.1
-# or (ON WINDOWS) 
+# Use one of (use binary only if default version compiles with errors)
 jsonnet-binary==0.17.0
 
 python-dotenv==0.21.1
