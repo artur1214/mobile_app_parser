@@ -19,6 +19,7 @@ def extract_data_from_app(el, mappings):
                 nested_lookup(el, spec_value['path'], True))
     return res
 
+
 def nested_lookup(source, indexes, none_on_error=False):
     """Recursive nested_lookup. (never reaches recursive deep. must be ok.)"""
     try:
@@ -32,6 +33,8 @@ def nested_lookup(source, indexes, none_on_error=False):
             raise exc
 
 
+# This code is duplicated with playstore parser. It's ok, we have this because
+# we want to make 2 SEPARATED parsers. so removing this will not break other.
 async def get_page(url: str,
                    timeout: int | None = None, none_on: int | list[int] = None):
     """Makes get request to page with proxy (if enabled)
@@ -45,10 +48,6 @@ async def get_page(url: str,
         timeout = aiohttp.ClientTimeout(connect=timeout)
     else:
         timeout = aiohttp.ClientTimeout(total=300)
-    # proxy_params = {
-    #     'proxy': PROXY_URL,
-    #     'proxy_auth': PROXY_AUTH
-    # } if PROXY_URL else {}
     async with aiohttp.ClientSession(timeout=timeout,
                                      trust_env=PROXY_ENABLED) as session:
         async with session.get(url) as resp:
