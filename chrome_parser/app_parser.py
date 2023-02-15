@@ -32,7 +32,7 @@ MAPPINGS = {
     'developer address': [35, 1],
     'privacy_types': {
         'path': [39],
-        'fun': lambda val: ','.join(val)
+        'fun': lambda val: ','.join(str(val))
     },
 }
 
