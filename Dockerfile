@@ -4,7 +4,7 @@ WORKDIR /code
 ENV PROXY_ENABLED=0
 RUN apk add --no-cache make gcc g++ musl-dev linux-headers
 COPY requirements.txt requirements.txt
-RUN sudo pip install -r requirements.txt
+RUN pip install -r requirements.txt
 EXPOSE 8080
 COPY . .
 CMD ["python", "main.py"]
