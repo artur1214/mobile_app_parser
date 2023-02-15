@@ -1,6 +1,6 @@
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
 </head>
 <body>
 
@@ -9,15 +9,19 @@
         const form = document.getElementById('link_sender_form')
         const a = document.getElementById('download_link')
         const btn = document.getElementById('send_btn')
+        const spinner = document.getElementById('spinner')
+        const msg = document.getElementById('err_msg')
         form.addEventListener('submit', (evt) => {
             evt.preventDefault();
             a.style.display = 'none';
+            msg.style.display = 'none';
             //console.log(evt)
             (async () => {
                 const data = new FormData(evt.target)
                 //document.getElementById('send_btn')
                 btn.disabled = true;
                 a.style.display = 'none';
+                spinner.style.display = 'inline-block'
                 const resp = await fetch("{{ current_host }}", {
                     method: 'POST',
                     body: data
@@ -26,25 +30,36 @@
 
                 a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}))
                 a.style.display = 'block';
+                spinner.style.display = 'none'
                 btn.disabled = false;
-            })().then()
+            })().then().catch((err) => {
+                msg.style.display = 'block'
+                spinner.style.display = 'none'
+                btn.disabled = false;
+            })
         })
 
     })
 
 </script>
 <div class="container align-content-center mt-5">
-
     <form id="link_sender_form">
         <div class="form-group">
-            <label for="link">Email address</label>
+            <label for="link">Link:</label>
             <input type="text" class="form-control" id="link" name="link" aria-describedby="linkHelp"
                    placeholder="Enter link to process">
             <small id="linkHelp" class="form-text text-muted"><b>Example: </b>https://play.google.com/store/search?q=minecraft&c=apps</small>
         </div>
-        <button id="send_btn" class="btn btn-primary">Send to parser</button>
+        <button id="send_btn" class="btn btn-primary" style="padding-left:  20px; padding-right: 20px">
+            Loading
+            <span id="spinner" style="display: none" class="spinner-border spinner-border-sm" role="status"
+                  aria-hidden="true"></span>
+        </button>
     </form>
     <a class="btn-link" style="display: none" href="" id="download_link" download="results.csv">Download</a>
+    <div style="display: none" id="err_msg" class="alert alert-danger" role="alert">
+        Invalid link!
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
