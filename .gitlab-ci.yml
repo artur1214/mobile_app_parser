@@ -23,3 +23,6 @@ deploy-job:      # This job runs in the deploy stage.
   script:
     - echo "Deploying application..."
     - echo "Application successfully deployed."
+    - docker-compose down
+    - docker-compose build
+    - docker-compose up
