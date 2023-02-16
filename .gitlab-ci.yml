@@ -14,7 +14,7 @@ unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
     - echo "Running unit tests... This will take some time"
-    - python -m unittest -p tests.py
+    - python -m unittest discover -p tests.py
     - echo "Code coverage is 90%"
 
 deploy-job:      # This job runs in the deploy stage.
