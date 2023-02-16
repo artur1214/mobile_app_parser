@@ -22,7 +22,7 @@ SEARCH_TERM_URL = (
     "&category=extensions"
     "&container=CHROME"
 )
-print(SEARCH_TERM_URL)
+
 
 MAPPINGS = {
     'id': [0],
@@ -58,7 +58,6 @@ async def get_items_from_search_term(search_term: str, lang='en', country='US'):
     res = []
     for item in data:
         res.append(utils.extract_data_from_app(item, MAPPINGS))
-    print(len(res))
     return res
 
 
@@ -87,7 +86,6 @@ async def parse(url: str):
         res = await parse_search(url, lang, country)
     else:
         _id = url.split('?')[0].split('/')[-1]
-        print(_id)
         res = [await app_parser.parse_app(_id, lang, country)]
     return res
 

@@ -9,7 +9,6 @@ from playmarket_parser import parse_from_url, save_json_to_csv
 from appstore_parser import parse as parse_apple
 from chrome_parser import parse as chrome_parse
 
-
 routes = web.RouteTableDef()
 
 
@@ -44,13 +43,21 @@ class IndexView(web.View):
                 return web.Response(text=str(e))
 
 
-app = web.Application()
+def make_app():
+    """Creates app
 
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
-app.add_routes(routes)
+    This function creates new app instance. We create new Application instance
+    on every call because it's needed for tests.
 
+    """
+
+    app = web.Application()
+
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
+    app.add_routes(routes)
+    return app
 
 if __name__ == '__main__':
-    web.run_app(app)
+    web.run_app(make_app())
     # url = 'https://play.google.com/store/search?q=minecraft&c=apps'
     # asyncio.run(parse_from_url(url))

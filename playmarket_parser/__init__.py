@@ -7,7 +7,10 @@ import asyncio
 from urllib.parse import quote
 
 from _jsonnet import evaluate_snippet
-from typing.io import IO
+try:
+    from typing import IO
+except Exception as _exc:
+    from typing.io import IO
 
 from . import formats, utils, specs, regexes
 from .app_parser import get_app_info
@@ -35,9 +38,7 @@ def parse_service_data(dom):
         return {}
     data = matches[0]
     try:
-        # print(data)
         res = re.search(r"{'ds:[\s\S]*}}", data)
-        # print(ast.literal_eval(res.group()))
         parsed = evaluate_snippet('snippet', res.group())
         return parsed
     except (Exception,) as _exc:

@@ -71,5 +71,4 @@ if __name__ == '__main__':
     import asyncio
     async def main():
         res = await get_app_safety_data('ru.sports')
-        #print(res)
     asyncio.run(main())

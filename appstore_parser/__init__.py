@@ -28,7 +28,7 @@ def save_json_to_csv(data: list[dict], file):
 
 async def parse(url: str):
     if re.search(r'app/.*/id([0-9]+)', url):
-        res = await get_app_info(url)
+        res = [await get_app_info(url)]
     elif re.search(r'search/.*', url):
         res = await parse_search_link(url)
     else:

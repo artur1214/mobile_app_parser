@@ -33,7 +33,6 @@ def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
 
 
 async def get_app_info(app_id: str, lang: str = "en", country: str = "us"):
-    print('parsed')
     url = formats.detail.build(app_id, lang, country)
     try:
         res = await utils.get_page(url, 10, 404)
