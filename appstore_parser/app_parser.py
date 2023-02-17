@@ -2,7 +2,7 @@ import asyncio
 import json
 import pprint
 
-from . import utils
+from appstore_parser import utils
 import bs4
 import dataclasses
 
@@ -31,8 +31,11 @@ def parse_app_info(page: str):
     if title:
         title = utils.get_text(title)
     descriptionHTML = soup.find('div', class_='section__description')
-    descriptionHTML = descriptionHTML.find('div', class_='l-row')
-    description = descriptionHTML.text
+    if not descriptionHTML and not title:
+        return None
+    descriptionHTML = descriptionHTML and descriptionHTML.find('div', class_='l-row')
+    description = descriptionHTML and descriptionHTML.text
+
     summary = soup.find(
         'h2',
         class_='product-header__subtitle app-header__subtitle'
@@ -64,7 +67,7 @@ def parse_app_info(page: str):
     return {
         'title': title,
         'description': description,
-        'descriptionHTML': descriptionHTML,
+        'descriptionHTML': str(descriptionHTML),
         'summary': summary,
         'score': score,
         'ratings': ratings,
@@ -77,9 +80,13 @@ def parse_app_info(page: str):
     }
 
 
-async def get_app_info(url: str):
+async def get_app_info(url: str, reset=0):
     res = await utils.get_page(url)
     res = parse_app_info(res)
+    if res is None:
+        if reset > 3:
+            return None
+        res = await get_app_info(url, reset+1)
     return res
 
 

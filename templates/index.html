@@ -7,33 +7,48 @@
 <script defer>
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('link_sender_form')
-        const a = document.getElementById('download_link')
+        const a_csv = document.getElementById('download_link')
+        const a_json = document.getElementById('download_link_json')
         const btn = document.getElementById('send_btn')
         const spinner = document.getElementById('spinner')
         const msg = document.getElementById('err_msg')
         form.addEventListener('submit', (evt) => {
             evt.preventDefault();
-            a.style.display = 'none';
+            a_csv.style.display = 'none';
+            a_json.style.display = 'none'
             msg.style.display = 'none';
             //console.log(evt)
             (async () => {
                 const data = new FormData(evt.target)
                 //document.getElementById('send_btn')
                 btn.disabled = true;
-                a.style.display = 'none';
+                a_csv.style.display = 'none';
+                a_json.style.display = 'none'
                 spinner.style.display = 'inline-block'
                 const resp = await fetch("{{ current_host }}", {
                     method: 'POST',
                     body: data
                 })
-                const csv = await resp.text()
+                const res = await resp.json()
+                if(res.ok){
+                    let csv = res.csv || ''
+                    let json = JSON.stringify(res.data) || '[]'
+                    a_csv.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}))
+                    a_json.href = URL.createObjectURL(new Blob([json], {type: 'application/json'}))
+                    a_csv.style.display = 'block';
+                    a_json.style.display = 'block';
+                    spinner.style.display = 'none';
+                    btn.disabled = false;
+                }
+                else {
+                    msg.style.display = 'block';
+                    msg.innerText = (res.data? "server responded error: " + res.data : "Unknown error accused.") + " Please, contact developers to get help."
+                }
 
-                a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}))
-                a.style.display = 'block';
-                spinner.style.display = 'none'
-                btn.disabled = false;
             })().then().catch((err) => {
+                console.log(err)
                 msg.style.display = 'block'
+                msg.innerText = 'Invalid link!'
                 spinner.style.display = 'none'
                 btn.disabled = false;
             })
@@ -56,7 +71,8 @@
                   aria-hidden="true"></span>
         </button>
     </form>
-    <a class="btn-link" style="display: none" href="" id="download_link" download="results.csv">Download</a>
+    <a class="btn-link" style="display: none" href="" id="download_link" download="results.csv">Download  CSV</a>
+    <a class="btn-link" style="display: none" href="" id="download_link_json" download="results.json">Download JSON</a>
     <div style="display: none" id="err_msg" class="alert alert-danger" role="alert">
         Invalid link!
     </div>

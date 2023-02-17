@@ -1,6 +1,7 @@
 import csv
 import json
 import re
+from io import StringIO
 from typing import Any, TextIO
 
 import asyncio
@@ -9,7 +10,7 @@ from urllib.parse import quote
 from _jsonnet import evaluate_snippet
 try:
     from typing import IO
-except Exception as _exc:
+except (ImportError, ModuleNotFoundError):  # For compatibility with old python
     from typing.io import IO
 
 from . import formats, utils, specs, regexes
@@ -127,7 +128,7 @@ async def process_pages(data, saved_apps):
     return await check_finished([*saved_apps, *app_list], token)
 
 
-def save_json_to_csv(data: list[dict[str, Any]], file: TextIO):
+def save_json_to_csv(data: list[dict[str, Any]], file: StringIO):
     """Saves json data into csv file. or stream
 
         Args:
@@ -135,14 +136,27 @@ def save_json_to_csv(data: list[dict[str, Any]], file: TextIO):
             file (TextIO): IO object (file, tokenstream, etc.)
              with 'write' method
     """
-    # TODO: old way with pandas. must be removed.
-    # df = pd.DataFrame(data)
-    # df.to_csv('res.csv')
-    # print(df)
-    output = csv.writer(file)
-    output.writerow(data[0].keys())  # header row
-    for row in data:
-        output.writerow(row.values())
+    try:
+        if len(data) == 0:
+            return {
+                'ok': True,
+                'csv': '',
+                'data': data
+            }
+        output = csv.writer(file)
+        output.writerow(data[0].keys())  # header row
+        for row in data:
+            output.writerow(row.values())
+        return {
+            'ok': True,
+            'data': data,
+            'csv': file.getvalue()
+        }
+    except (IndexError, AttributeError) as _exc:
+        return {
+            'ok': False,
+            'data': _exc
+        }
 
 
 async def parse_urls(url: str | list[str]):
@@ -179,6 +193,12 @@ async def parse_urls(url: str | list[str]):
 
 
 async def parse_from_url(url: str, stream_to: IO | None = None):
+    if detail := url.split('details?'):
+        if len(detail) > 1:
+            url = detail[-1].split('id=')[-1].replace('/', '')
+            parsed = [await get_app_info(url)]
+            parsed = list(filter(None, parsed))
+            return parsed
     res = await parse_urls(url)
     print(f'found {len(res)} elements to parse')
     coroutines = []

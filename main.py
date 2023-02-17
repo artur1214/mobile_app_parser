@@ -35,12 +35,22 @@ class IndexView(web.View):
                     res = await chrome_parse(link)
 
                 stream = io.StringIO()
-                save_json_to_csv(res, stream)
-                return web.Response(text=stream.getvalue())
+                res = save_json_to_csv(res, stream)
+                print(res)
+                return web.json_response(
+                    data=res,
+                    status=200 if res.get('ok') else 200
+                )
                 # return web.json_response(res)
-            except Exception as e:
-                print('error!', e)
-                return web.Response(text=str(e))
+            except Exception as exc:
+                print('error!', exc)
+                return web.json_response(
+                    data={
+                        'ok': False,
+                        'data': exc
+                    },
+                    status=500
+                )
 
 
 def make_app():

@@ -2,10 +2,12 @@ import asyncio
 import csv
 import pprint
 
-from .app_parser import get_app_info
-from . import utils
+from appstore_parser.app_parser import get_app_info
+from appstore_parser import utils
 import bs4
 import re
+
+__all__ = ('parse', 'save_json_to_csv', get_app_info)
 
 
 def save_json_to_csv(data: list[dict], file):
@@ -33,7 +35,7 @@ async def parse(url: str):
         res = await parse_search_link(url)
     else:
         raise ValueError(url + ' is not valid url to parse.')
-    return res
+    return list(filter(None, res))
 
 
 async def parse_search_link(url: str):
@@ -49,6 +51,7 @@ async def parse_search_link(url: str):
 
 if __name__ == '__main__':
     async def main():
-        res = await parse('https://www.apple.com/us/search/maincraf?sel=explore&src=globalnav')
-        save_json_to_csv(res, )
+        res = await parse('https://apps.apple.com/us/app/minecraft/id479516143')
+        print(res)
+        #save_json_to_csv(res,)
     asyncio.run(main())

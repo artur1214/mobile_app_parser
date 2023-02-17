@@ -13,7 +13,7 @@ PROXY_ENABLED = bool(int(os.environ.get('PROXY_ENABLED', 0)))
 
 
 def get_text(parent: bs4.element.Tag):
-    return ''.join(parent.find_all(text=True, recursive=False)).strip()
+    return ''.join(parent.find_all(string=True, recursive=False)).strip()
 
 
 async def get_page(url: str,
