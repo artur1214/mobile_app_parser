@@ -1,12 +1,13 @@
+"""Module with functions to parse one single app"""
 import asyncio
 from typing import Any
 
 import aiohttp
 
-from . import formats
-from . import specs
-from . import utils
-from . import datasafety
+from playmarket_parser import formats
+from playmarket_parser import specs
+from playmarket_parser import utils
+from playmarket_parser import datasafety
 
 
 def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:

@@ -1,16 +1,22 @@
+"""Code to parse single app info from appstore"""
+
 import asyncio
 import json
-import pprint
 
 from appstore_parser import utils
 import bs4
 import dataclasses
 
-PRIVACY_DETAILS = 'https://amp-api.apps.apple.com/v1/catalog/us/apps/{}?l=en-us&platform=web&fields=privacyDetails'
+PRIVACY_DETAILS = 'https://amp-api.apps.apple.com/v1/catalog/us/apps/' \
+                  '{}?l=en-us&platform=web&fields=privacyDetails'
 
 
 @dataclasses.dataclass
 class App:
+    """Class to serialize App dict
+
+    This class must represent dict with parsed app info
+    """
     title: str
     descriptionHTML: str
     description: str
@@ -30,11 +36,11 @@ def parse_app_info(page: str):
     title = soup.find('h1', class_='product-header__title app-header__title')
     if title:
         title = utils.get_text(title)
-    descriptionHTML = soup.find('div', class_='section__description')
-    if not descriptionHTML and not title:
-        return None
-    descriptionHTML = descriptionHTML and descriptionHTML.find('div', class_='l-row')
-    description = descriptionHTML and descriptionHTML.text
+    description_html = soup.find('div', class_='section__description')
+    if not description_html and not title:
+        return
+    description_html = description_html and description_html.find('div', class_='l-row')
+    description = description_html and description_html.text
 
     summary = soup.find(
         'h2',
@@ -67,7 +73,7 @@ def parse_app_info(page: str):
     return {
         'title': title,
         'description': description,
-        'descriptionHTML': str(descriptionHTML),
+        'descriptionHTML': str(description_html),
         'summary': summary,
         'score': score,
         'ratings': ratings,
@@ -86,6 +92,7 @@ async def get_app_info(url: str, reset=0):
     if res is None:
         if reset > 3:
             return None
+        await asyncio.sleep(5)
         res = await get_app_info(url, reset+1)
     return res
 

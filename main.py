@@ -1,3 +1,5 @@
+"""Frontend server for parser."""
+
 import io
 import urllib.parse
 
@@ -14,14 +16,16 @@ routes = web.RouteTableDef()
 
 @routes.view('/')
 class IndexView(web.View):
-
+    """Main view class"""
     @aiohttp_jinja2.template('index.html')
     async def get(self):
+        """GET request handler"""
         return {
             'current_host': f'{self.request.scheme}://{self.request.host}'
         }
 
     async def post(self):
+        """POST request handler"""
         data = await self.request.post()
         if link := data.get('link'):
             try:
@@ -42,7 +46,7 @@ class IndexView(web.View):
                     status=200 if res.get('ok') else 200
                 )
                 # return web.json_response(res)
-            except Exception as exc:
+            except (ValueError, IndexError) as exc:
                 print('error!', exc)
                 return web.json_response(
                     data={
@@ -53,11 +57,14 @@ class IndexView(web.View):
                 )
 
 
-def make_app():
+def make_app() -> web.Application:
     """Creates app
 
     This function creates new app instance. We create new Application instance
     on every call because it's needed for tests.
+
+    Returns:
+        web.Application
 
     """
 
@@ -66,6 +73,7 @@ def make_app():
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
     app.add_routes(routes)
     return app
+
 
 if __name__ == '__main__':
     web.run_app(make_app())

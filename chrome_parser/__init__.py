@@ -1,6 +1,6 @@
+"""Module for parse chrome extensions webstore"""
 import asyncio
 import json
-import pprint
 import urllib.parse
 from chrome_parser import app_parser
 from chrome_parser import utils
@@ -46,7 +46,23 @@ MAPPINGS = {
 
 
 async def get_items_from_search_term(search_term: str, lang='en', country='US'):
+    """parses all extensions by provided search term
 
+    Parses data from Google's batch request api. Batch request api is very
+     complex.
+     See https://kovatch.medium.com/deciphering-google-batchexecute-74991e4e446c
+     if you want get some useful information.
+
+    Args:
+        search_term (str): term from search string
+        lang (str): language, which we provide into google api
+        country(str) lang attribute analog but with country code
+
+    Returns:
+        list[dict]: list with parsed info
+
+
+    """
     resp = await utils.post_page(
         SEARCH_TERM_URL.format(lang, country, search_term),
         data='login=&'
@@ -54,7 +70,7 @@ async def get_items_from_search_term(search_term: str, lang='en', country='US'):
     data = resp[5:]
 
     data = json.loads(data)
-    data = utils.nested_lookup(data, [0,1,1])
+    data = utils.nested_lookup(data, [0, 1, 1])
     res = []
     for item in data:
         res.append(utils.extract_data_from_app(item, MAPPINGS))
@@ -62,6 +78,20 @@ async def get_items_from_search_term(search_term: str, lang='en', country='US'):
 
 
 async def parse_search(url: str, lang='en', country='US'):
+    """Parses apps info from provided search url
+
+    Gets url like https://play.google.com/store/search?q=minecraft&c=apps
+      parses all app ids from that page, then parses all info from pages with
+      apps infos (by app id)
+
+    Args:
+        url (str): url from which we will parse info.
+        lang (str): language code, which we provide into google api
+        country(str) lang attribute analog but with country code
+
+    Returns:
+        list[dict]: list with parsed info
+    """
     term = url.split('?')[0].split('/')[-1]
     apps = await get_items_from_search_term(term, lang, country)
     res = []
@@ -73,6 +103,12 @@ async def parse_search(url: str, lang='en', country='US'):
 
 
 async def parse(url: str):
+    """Main chrome parse function
+
+    wrapper for parse_search or parse_app function calls. Must be used always
+      instead of more low level functions. Gets url, returns result. Easy :).
+
+    """
     query = urllib.parse.urlparse(url).query
     query = urllib.parse.parse_qs(query)
     lang = query.get('hl', [])

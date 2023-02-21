@@ -1,3 +1,4 @@
+"""Module for parse app store"""
 import asyncio
 import csv
 import pprint
@@ -7,21 +8,18 @@ from appstore_parser import utils
 import bs4
 import re
 
-__all__ = ('parse', 'save_json_to_csv', get_app_info)
+__all__ = ('parse', 'save_json_to_csv', 'get_app_info')
 
 
 def save_json_to_csv(data: list[dict], file):
-    """Saves json data into csv file. or stream
+    """Saves json data into csv file. or file-like stream
 
-        Args:
-            data (list[dict]): list with data to save
-            file (TextIO): IO object (file, tokenstream, etc.)
-             with 'write' method
+    Args:
+        data (list[dict]): list with data to save
+        file (TextIO): IO object (file, tokenstream, etc.)
+          with 'write' method
+
     """
-    # TODO: old way with pandas. must be removed.
-    # df = pd.DataFrame(data)
-    # df.to_csv('res.csv')
-    # print(df)
     output = csv.writer(file)
     output.writerow(data[0].keys())  # header row
     for row in data:

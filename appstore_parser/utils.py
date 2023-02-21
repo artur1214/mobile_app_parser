@@ -1,4 +1,4 @@
-
+"""Useful functions for app_store parser"""
 import os
 
 import aiohttp
@@ -13,17 +13,25 @@ PROXY_ENABLED = bool(int(os.environ.get('PROXY_ENABLED', 0)))
 
 
 def get_text(parent: bs4.element.Tag):
+    """Returns tag inner text (text without childs texts)"""
     return ''.join(parent.find_all(string=True, recursive=False)).strip()
 
 
 async def get_page(url: str,
                    timeout: int | None = None, none_on: int | list[int] = None):
     """Makes get request to page with proxy (if enabled)
-
     Args:
         url (str): url to process.
         timeout (int|None): connection max time in seconds.
-        none_on (int | list[int]):
+        none_on (int | list[int]): codes which must return None if responded.
+
+    Returns:
+        str: Response text
+        None: If response code was provided in none_on
+
+    Raises:
+          aiohttp.ClientTimeout: if server not responded
+          AttributeError: if text not provided
     """
     if timeout is not None:
         timeout = aiohttp.ClientTimeout(connect=timeout)
@@ -42,6 +50,18 @@ async def get_page(url: str,
 
 
 async def post_page(url, data):
+    """Makes get request to page with proxy (if enabled)
+    Args:
+        url (str): url to process.
+        data (Any): connection max time in seconds.
+
+    Returns:
+        str: Response text
+
+    Raises:
+          aiohttp.ClientTimeout: if server not responded
+          AttributeError: if text not provided
+    """
     async with aiohttp.ClientSession(trust_env=PROXY_ENABLED) as session:
         async with session.post(url, data=data, headers={
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'

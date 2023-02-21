@@ -1,14 +1,14 @@
+"""Server parser tests. """
 from aiohttp.test_utils import AioHTTPTestCase
-from aiohttp import web
+from main import make_app
 
 
 class MyAppTestCase(AioHTTPTestCase):
-
+    """Tests for web application for parsers"""
     async def get_application(self):
         """
         Override the get_app method to return your application.
         """
-        from main import make_app
         return make_app()
 
     async def test_page_founded(self):
@@ -23,7 +23,7 @@ class MyAppTestCase(AioHTTPTestCase):
 
     async def test_send_apple(self):
         async with self.client.request("POST", "/", data={
-            'link': 'https://apps.apple.com/us/app/minecraft/id479516143'}
+            "link": "https://apps.apple.com/us/app/minecraft/id479516143"}
                                        ) as resp:
             self.assertEqual(resp.status, 200)
             text = await resp.text()
