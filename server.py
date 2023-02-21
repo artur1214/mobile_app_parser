@@ -61,7 +61,7 @@ def make_app() -> web.Application:
     """Creates app
 
     This function creates new app instance. We create new Application instance
-    on every call because it's needed for tests.
+    on every call because it's needed for tests and for gunicorn.
 
     Returns:
         web.Application
@@ -73,6 +73,11 @@ def make_app() -> web.Application:
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
     app.add_routes(routes)
     return app
+
+
+async def get_gunicorn_app_instance():
+    """Gunicorn entry point."""
+    return make_app()
 
 
 if __name__ == '__main__':
