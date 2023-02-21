@@ -6,4 +6,4 @@ services:
       - "9999:8080"
     volumes:
       - .:/code
-    command: /bin/bash /code/init.sh
+    command: /bin/sh /code/init.sh
