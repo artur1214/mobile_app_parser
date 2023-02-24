@@ -40,9 +40,9 @@ async def parse_search_link(url: str):
     page = await utils.get_page(url)
     soup = bs4.BeautifulSoup(page, 'lxml')
     div = soup.find('div', class_='rf-serp-explore')
-    links = div and div.find_all("a", string="View more")
+    lis_with_a = div and div.find_all("li", class_='rf-serp-productoption-link')
+    links = [li.find_all("a")[0].get('href') for li in lis_with_a]
     print(f'found {len(links)} elements to parse.')
-    links = [link.get('href') for link in links]
     coroutines = [get_app_info(link) for link in links]
     res = await asyncio.gather(*coroutines)
     return res

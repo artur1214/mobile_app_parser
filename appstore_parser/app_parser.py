@@ -6,6 +6,7 @@ import json
 from appstore_parser import utils
 import bs4
 import dataclasses
+from price_parser import Price
 
 PRIVACY_DETAILS = 'https://amp-api.apps.apple.com/v1/catalog/us/apps/' \
                   '{}?l=en-us&platform=web&fields=privacyDetails'
@@ -50,7 +51,7 @@ def parse_app_info(page: str):
         'span',
         class_='we-customer-ratings__averages__display'
     )
-    score = score and score.text and float(score.text.strip())
+    score = score and score.text and float(score.text.replace(',', '.').strip())
     ratings = soup.find(
         'div',
         class_='we-customer-ratings__count small-hide medium-show'
@@ -62,9 +63,10 @@ def parse_app_info(page: str):
         class_='inline-list__item inline-list__item-'
                '-bulleted app-header__list__item--price'
     )
-    price = price and price.text and price.text.strip()
-    free = bool((not price) or (price.lower() == 'free'))
-    currency = 'USD' if price and ('$' in price) else None
+    price = price and price.text and Price.fromstring(price.text.strip())
+    currency = price.currency
+    price = price.amount_float
+    free = bool((not price) or (price == 0))
     developer_link = soup.find(
         'h2',
         class_='product-header__identity app-header__identity'
@@ -84,7 +86,7 @@ def parse_app_info(page: str):
         'summary': summary,
         'score': score,
         'ratings': ratings,
-        'price': price,
+        'price': price or 0,
         'free': free,
         'currency': currency,
         'developer': developer,
