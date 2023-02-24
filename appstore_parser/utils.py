@@ -68,3 +68,14 @@ async def post_page(url, data):
         }) as resp:
             res = await resp.text()
             return res
+
+
+async def post(url, data):
+    async with aiohttp.ClientSession(trust_env=PROXY_ENABLED) as session:
+        async with session.post(url, json=data, headers={
+            'Content-Type': 'application/json'
+        }) as resp:
+            if resp.status == 200:
+                return await resp.json()
+            else:
+                return None
