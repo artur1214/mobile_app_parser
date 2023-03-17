@@ -7,6 +7,8 @@ import dotenv
 dotenv.load_dotenv()
 
 PROXY_ENABLED = bool(int(os.environ.get('PROXY_ENABLED', 0)))
+DEFAULT_CHROME_LANG = os.environ.get('DEFAULT_CHROME_LANG', 'en')
+DEFAULT_CHROME_COUNTRY = os.environ.get('DEFAULT_CHROME_COUNTRY', 'US')
 
 
 def extract_data_from_app(el, mappings):

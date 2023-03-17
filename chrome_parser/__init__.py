@@ -8,16 +8,16 @@ from chrome_parser import utils
 __all__ = ('utils', 'app_parser', 'parse')
 
 SEARCH_TERM_URL = (
-    "https://chrome.google.com/webstore/ajax/"
-    "item?hl={}&gl={}"
-    "&pv=20210820&mce="
-    "atf%2Cpii%2Crtr%2Crlb%2Cgtc"
-    "%2Chcn%2Csvp%2Cwtd%2Chap%2Cnma%"
-    "2Cdpb%2Cutb%2Chbh%2Cebo%2Chqb%2Cif"
-    "m%2Cndd%2Cntd%2Coiu%2Cuga%2Cc3d%2Cncr%"
-    "2Chns%2Cctm%2Cac%2Chot%2Chfi%2Cdtp%2Cmac%"
-    "2Cbga%2Cfcf%2Chsp%2Crma&count=112&"
-    "searchTerm={}&sortBy=0"
+    "https://chrome.google.com/webstore/ajax/item"
+    "?hl={}"
+    "&gl={}"
+    "&pv=20210820"
+    "&mce=atf%2Cpii%2Crtr%2Crlb%2Cgtc%2Chcn%2Csvp%2Cwtd%2Chap%2Cnma%2Cdpb%2Cut"
+    "b%2Chbh%2Cebo%2Chqb%2Cifm%2Cndd%2Cntd%2Coiu%2Cuga%2Cc3d%2Cncr%2Chns%2Cctm"
+    "%2Cac%2Chot%2Chfi%2Cdtp%2Cmac%2Cbga%2Cfcf%2Chsp%2Crma"
+    "&count=549"  # Seems like 549 is a maximal count possible.
+    "&searchTerm={}"
+    "&sortBy=0"
     "&rt=j"
     "&category=extensions"
     "&container=CHROME"
@@ -45,7 +45,9 @@ MAPPINGS = {
 }
 
 
-async def get_items_from_search_term(search_term: str, lang='en', country='US'):
+async def get_items_from_search_term(search_term: str,
+                                     lang: str = utils.DEFAULT_CHROME_LANG,
+                                     country: str = utils.DEFAULT_CHROME_COUNTRY):
     """parses all extensions by provided search term
 
     Parses data from Google's batch request api. Batch request api is very
@@ -60,8 +62,6 @@ async def get_items_from_search_term(search_term: str, lang='en', country='US'):
 
     Returns:
         list[dict]: list with parsed info
-
-
     """
     resp = await utils.post_page(
         SEARCH_TERM_URL.format(lang, country, search_term),
@@ -77,7 +77,8 @@ async def get_items_from_search_term(search_term: str, lang='en', country='US'):
     return res
 
 
-async def parse_search(url: str, lang='en', country='US'):
+async def parse_search(url: str, lang: str = utils.DEFAULT_CHROME_LANG,
+                       country: str = utils.DEFAULT_CHROME_COUNTRY):
     """Parses apps info from provided search url
 
     Gets url like https://play.google.com/store/search?q=minecraft&c=apps
@@ -107,16 +108,11 @@ async def parse(url: str):
 
     wrapper for parse_search or parse_app function calls. Must be used always
       instead of more low level functions. Gets url, returns result. Easy :).
-
     """
     query = urllib.parse.urlparse(url).query
     query = urllib.parse.parse_qs(query)
-    lang = query.get('hl', [])
-    if lang:
-        lang = lang[0] or 'en'
-    country = query.get('hl', [])
-    if country:
-        country = country[0] or 'US'
+    lang = query.get('hl', [utils.DEFAULT_CHROME_LANG])[0]
+    country = query.get('gl', [utils.DEFAULT_CHROME_COUNTRY])[0]
 
     if '/search/' in url:
         res = await parse_search(url, lang, country)
