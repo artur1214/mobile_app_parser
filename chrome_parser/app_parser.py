@@ -57,6 +57,8 @@ async def parse_app(_id: str, lang='en', country='US'):
     return res
 
 
+
+
 if __name__ == '__main__':
     async def main():
         await parse_app('https://chrome.google.com/webstore/detail/adguard-adblocker/bgnkhhnnamicmpeenaelnjfhikgbkllg?hl=ru&gl=RU')

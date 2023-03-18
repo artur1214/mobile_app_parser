@@ -32,6 +32,16 @@ class App:
 
 
 def parse_app_info(page: str):
+    """Parse single app info from HTML dom.
+
+    Args:
+        page (str): page HTML string.
+
+    Returns:
+        dict | None: parsed app info or None
+          if provided HTML doesn't contain valid app info.
+
+    """
     soup = bs4.BeautifulSoup(page, 'lxml')
     title = soup.find('h1', class_='product-header__title app-header__title')
     if title:
@@ -39,7 +49,8 @@ def parse_app_info(page: str):
     description_html = soup.find('div', class_='section__description')
     if not description_html and not title:
         return
-    description_html = description_html and description_html.find('div', class_='l-row')
+    description_html = description_html and description_html.find(
+        'div', class_='l-row')
     description = description_html and description_html.text
 
     summary = soup.find(
@@ -87,18 +98,35 @@ def parse_app_info(page: str):
 
 
 async def get_app_info(url: str, reset=0):
+    """Parse single app info from url. And makes resets.
+
+    Appstore sometimes responses with not valid HTML response
+      (instead gives `loading` page etc.). So, we
+
+    Args:
+        url (str): Url to parse from
+        reset (int): Field, used only in recursion.
+          If function retries get url data 4 times and it's not succeed
+          None will be returned
+
+    Returns:
+        dict | None: parsed app info or None
+          if it's unable to get data from provided url
+
+    """
     res = await utils.get_page(url)
     res = parse_app_info(res)
     if res is None:
         if reset > 3:
             return None
         await asyncio.sleep(5)
-        res = await get_app_info(url, reset+1)
+        res = await get_app_info(url, reset + 1)
     return res
 
 
 if __name__ == '__main__':
     async def main():
         pass
+
 
     asyncio.run(main())

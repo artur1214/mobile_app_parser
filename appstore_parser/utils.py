@@ -19,11 +19,13 @@ def get_text(parent: bs4.element.Tag):
 
 async def get_page(url: str,
                    timeout: int | None = None, none_on: int | list[int] = None):
-    """Makes get request to page with proxy (if enabled)
+    """Makes GET request to page with proxy (if enabled)
     Args:
-        url (str): url to process.
-        timeout (int|None): connection max time in seconds.
-        none_on (int | list[int]): codes which must return None if responded.
+        url (str): url to process
+
+        timeout (int): connection max time in seconds
+
+        none_on (int | list): codes which must return None if responded.
 
     Returns:
         str: Response text
@@ -50,17 +52,17 @@ async def get_page(url: str,
 
 
 async def post_page(url, data):
-    """Makes get request to page with proxy (if enabled)
+    """Makes POST request to page with proxy (if enabled)
     Args:
         url (str): url to process.
-        data (Any): connection max time in seconds.
+        data (Any): data to send.
 
     Returns:
         str: Response text
 
     Raises:
           aiohttp.ClientTimeout: if server not responded
-          AttributeError: if text not provided
+          AttributeError: if text in response is not provided
     """
     async with aiohttp.ClientSession(trust_env=PROXY_ENABLED) as session:
         async with session.post(url, data=data, headers={
