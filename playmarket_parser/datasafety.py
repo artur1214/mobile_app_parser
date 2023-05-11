@@ -9,6 +9,7 @@ from . import utils
 PLAY_STORE_BASE_URL = "https://play.google.com"
 SAFETY_URL = f'{PLAY_STORE_BASE_URL}/store/apps/datasafety?'
 
+
 def map_data_entries(entries):
     if not entries:
         return []

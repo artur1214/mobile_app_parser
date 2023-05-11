@@ -8,6 +8,7 @@ from playmarket_parser import formats
 from playmarket_parser import specs
 from playmarket_parser import utils
 from playmarket_parser import datasafety
+from playmarket_parser import permissions
 
 
 def parse_dom(dom: str, app_id: str, url: str) -> dict[str, Any]:
@@ -41,6 +42,11 @@ async def get_app_info(app_id: str, lang: str = "en", country: str = "us"):
             return None
         res = parse_dom(res, app_id, url)
         res['datasafety'] = await datasafety.get_app_safety_data(app_id, lang)
+        perms = await permissions.get_permissions(app_id, lang, country)
+        res['permissionsJson'] = perms
+        res['interestedPerms'] = ';\n'.join(
+            permissions.get_interested_permissions(perms)
+        )
         return res
     except aiohttp.ClientError:
         return None

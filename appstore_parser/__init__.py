@@ -130,6 +130,6 @@ def get_query(url):
 if __name__ == '__main__':
     async def main():
         res = await parse('https://apps.apple.com/us/app/minecraft/id479516143')
-        print(res)
+        #print(res)
         #save_json_to_csv(res,)
     asyncio.run(main())

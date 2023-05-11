@@ -40,7 +40,7 @@ class IndexView(web.View):
 
                 stream = io.StringIO()
                 res = save_json_to_csv(res, stream)
-                print(res)
+                #print(res)
                 return web.json_response(
                     data=res,
                     status=200 if res.get('ok') else 200

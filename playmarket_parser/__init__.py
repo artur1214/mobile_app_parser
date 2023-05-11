@@ -14,7 +14,7 @@ try:
 except (ImportError, ModuleNotFoundError):  # For compatibility with old python
     from typing.io import IO
 
-from . import formats, utils, specs, regexes
+from . import formats, utils, specs, regexes, permissions
 from .app_parser import get_app_info
 
 
@@ -130,8 +130,8 @@ async def process_pages(data, saved_apps):
     return await check_finished([*saved_apps, *app_list], token)
 
 
-def save_json_to_csv(data: list[dict[str, Any]], file: StringIO):
-    """Saves json data into csv file. or stream
+def save_json_to_csv(data: list[dict[str, Any]], file: TextIO):
+    """Saves json data into csv file or stream
 
         Args:
             data (list[dict]): list with data to save
@@ -214,7 +214,7 @@ async def parse_from_url(url: str, stream_to: IO | None = None):
 
 
 __all__ = ('app_parser', 'parse_from_url', 'utils', 'datasafety', 'specs',
-           'formats', 'regexes', 'save_json_to_csv')
+           'formats', 'regexes', 'save_json_to_csv', 'permissions')
 
 
 if __name__ == '__main__':
