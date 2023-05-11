@@ -4,8 +4,6 @@ from typing import Dict, List
 
 from playmarket_parser.specs import ElementSpecs
 from playmarket_parser import regexes
-from google_play_scraper.constants.request import Formats
-from google_play_scraper.utils.request import post
 from playmarket_parser import utils
 
 PLAY_STORE_BASE_URL = "https://play.google.com"
