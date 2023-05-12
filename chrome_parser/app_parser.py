@@ -19,7 +19,7 @@ MAPPINGS = {
     'installs': [0, 23],
     'details': {
         'path': [0, 46],
-        'fun': lambda url: 'https://chrome.google.com' + url
+        'fun': lambda url: 'https://chrome.google.com' + (url or '')
     },
     'developer_site': [0, 81],
     'description': [1],
