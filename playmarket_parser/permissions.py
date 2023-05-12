@@ -14,25 +14,33 @@ PERMISSIONS_URL = (
 ).format(PLAY_STORE_BASE_URL)
 
 
-INTERESTED_PERMISSIONS = [ p.strip() for p in """download files without notification
-read sync statistics
-receive data from Internet
-control vibration
+# INTERESTED_PERMISSIONS = [ p.strip() for p in """download files without notification
+# read sync statistics
+# receive data from Internet
+# control vibration
+# full network access
+# reorder running apps
+# change network connectivity
+# control Near Field Communication
+# create accounts and set passwords
+# install shortcuts
+# access Bluetooth settings
+# change your audio settings
+# read sync settings
+# use accounts on the device
+# pair with Bluetooth devices
+# view network connections
+# prevent device from sleeping
+# toggle sync on and off
+# run at startup""".splitlines() if p]
+
+
+INTERESTED_PERMISSIONS = [p.strip() for p in '''
 full network access
-reorder running apps
-change network connectivity
-control Near Field Communication
 create accounts and set passwords
-install shortcuts
-access Bluetooth settings
 change your audio settings
-read sync settings
-use accounts on the device
-pair with Bluetooth devices
 view network connections
-prevent device from sleeping
-toggle sync on and off
-run at startup""".splitlines() if p]
+'''.splitlines() if p]
 
 
 PAYLOAD_FORMAT_FOR_PERMISSION = "f.req=" \
