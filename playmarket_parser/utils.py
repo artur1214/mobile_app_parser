@@ -5,8 +5,12 @@ import os
 import aiohttp
 import dotenv
 
-from . import regexes
-from . import specs
+try:
+    from . import regexes
+    from . import specs
+except ImportError:
+    import regexes
+    import specs
 
 dotenv.load_dotenv()
 PROXY_ENABLED = bool(int(os.environ.get('PROXY_ENABLED', 0)))

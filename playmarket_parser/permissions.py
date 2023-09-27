@@ -2,9 +2,14 @@ import itertools
 import json
 from typing import Dict, List
 
-from playmarket_parser.specs import ElementSpecs
-from playmarket_parser import regexes
-from playmarket_parser import utils
+try:
+    from playmarket_parser.specs import ElementSpecs
+    from playmarket_parser import regexes
+    from playmarket_parser import utils
+except ImportError:
+    from specs import ElementSpecs
+    import regexes
+    import utils
 
 PLAY_STORE_BASE_URL = "https://play.google.com"
 
