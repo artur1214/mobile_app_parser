@@ -1,12 +1,15 @@
-aiohttp==3.8.3
+aiohttp==3.8.3  # Async http client and server
 
 #jsonnet==0.19.1
 # Use one of (use binary only if default version compiles with errors)
-jsonnet-binary==0.17.0
+jsonnet-binary==0.17.0 # Allows to handle JSONNET langage, and also allows
 
-python-dotenv==0.21.1
-aiohttp_jinja2==1.5.1
-Jinja2~=3.1.2
-bs4~=0.0.1
-beautifulsoup4~=4.11.2
-lxml~=4.9.2
+python-dotenv==0.21.1 # Easy load .env file
+aiohttp_jinja2==1.5.1 # Jinja2 for aithhp bind.
+Jinja2~=3.1.2 # Template language
+bs4~=0.0.1 # Parsing library
+beautifulsoup4~=4.11.2 # Parsing library
+lxml~=4.9.2 # More fast backend for bs4
+price-parser==0.3.4 # Easy handle price strings.
+cytoolz # For filtering
+gunicorn # Run server in docker.

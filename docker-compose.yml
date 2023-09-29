@@ -4,3 +4,6 @@ services:
     build: .
     ports:
       - "9999:8080"
+    volumes:
+      - .:/code
+    command: /bin/sh /code/init.sh

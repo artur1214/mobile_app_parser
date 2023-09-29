@@ -6,6 +6,7 @@ import json
 from appstore_parser import utils
 import bs4
 import dataclasses
+from price_parser import Price
 
 PRIVACY_DETAILS = 'https://amp-api.apps.apple.com/v1/catalog/us/apps/' \
                   '{}?l=en-us&platform=web&fields=privacyDetails'
@@ -52,35 +53,43 @@ def parse_app_info(page: str):
     description_html = description_html and description_html.find(
         'div', class_='l-row')
     description = description_html and description_html.text
-
     summary = soup.find(
         'h2',
         class_='product-header__subtitle app-header__subtitle'
-    ).text.strip()
-    score = float(soup.find(
+    )
+    summary = summary and summary.text and summary.text.strip()
+    score = soup.find(
         'span',
         class_='we-customer-ratings__averages__display'
-    ).text.strip())
+    )
+    score = score and score.text and float(score.text.replace(',', '.').strip())
     ratings = soup.find(
         'div',
         class_='we-customer-ratings__count small-hide medium-show'
-    ).text.replace('Ratings', '').strip()
+    )
+    ratings = ratings and ratings.text and \
+              ratings.text.replace('Ratings', '').strip()
     price = soup.find(
         'li',
         class_='inline-list__item inline-list__item-'
                '-bulleted app-header__list__item--price'
-    ).text.strip()
-    free = bool((not price) or (price.lower() == 'free'))
-    currency = 'USD' if price and ('$' in price) else None
+    )
+    price = price and price.text and Price.fromstring(price.text.strip())
+    currency = price.currency
+    price = price.amount_float
+    free = bool((not price) or (price == 0))
     developer_link = soup.find(
         'h2',
         class_='product-header__identity app-header__identity'
     ).find('a')
-    developer = developer_link.text.strip()
-    developer_id = int(
-        json.loads(developer_link.get('data-metrics-click'))['targetId'])
-    privacy_link = soup.find('section', class_='app-privacy').find('a').get(
-        'href')
+    developer = developer_link and developer_link.text and \
+                developer_link.text.strip()
+    developer_id = None
+    if developer_link:
+        developer_id = int(json.loads(
+            developer_link.get('data-metrics-click'))['targetId'])
+    privacy_link = soup.find('section', class_='app-privacy').find('a')
+    privacy_link = privacy_link and privacy_link.get('href')
     return {
         'title': title,
         'description': description,
@@ -88,7 +97,7 @@ def parse_app_info(page: str):
         'summary': summary,
         'score': score,
         'ratings': ratings,
-        'price': price,
+        'price': price or 0,
         'free': free,
         'currency': currency,
         'developer': developer,

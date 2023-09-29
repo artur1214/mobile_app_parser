@@ -28,17 +28,21 @@
                 const resp = await fetch("{{ current_host }}", {
                     method: 'POST',
                     body: data
-                })
-                const res = await resp.json()
+                });
+                const res = await resp.json();
                 if(res.ok){
-                    let csv = res.csv || ''
-                    let json = JSON.stringify(res.data) || '[]'
-                    a_csv.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}))
-                    a_json.href = URL.createObjectURL(new Blob([json], {type: 'application/json'}))
+                    let csv = res.csv || '';
+                    let json = JSON.stringify(res.data) || '[]';
+                    a_csv.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+                    a_json.href = URL.createObjectURL(new Blob([json], {type: 'application/json'}));
                     a_csv.style.display = 'block';
                     a_json.style.display = 'block';
                     spinner.style.display = 'none';
                     btn.disabled = false;
+                    if(Array.isArray(res.data) && !res.data.length) {
+                        msg.style.display = 'block';
+                        msg.innerText = "Parsed result is empty. It may cause if requested service api has been changed or now under maintenance. Try again later or contact us: artur.2002.artur@gmail.com";
+                    }
                 }
                 else {
                     msg.style.display = 'block';
@@ -64,6 +68,9 @@
             <input type="text" class="form-control" id="link" name="link" aria-describedby="linkHelp"
                    placeholder="Enter link to process">
             <small id="linkHelp" class="form-text text-muted"><b>Example: </b>https://play.google.com/store/search?q=minecraft&c=apps</small>
+            <label>
+                <input type="checkbox" name="full_search"> Enable extended search (beta for Play Market)
+            </label>
         </div>
         <button id="send_btn" class="btn btn-primary" style="padding-left:  20px; padding-right: 20px">
             Send

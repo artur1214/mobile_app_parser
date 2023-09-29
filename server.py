@@ -27,6 +27,7 @@ class IndexView(web.View):
     async def post(self):
         """POST request handler"""
         data = await self.request.post()
+        full_search = data.get('full_search', False)
         if link := data.get('link'):
             try:
                 host = urllib.parse.urlparse(link).netloc
@@ -34,13 +35,13 @@ class IndexView(web.View):
                     res = await parse_apple(link)
                 # result = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 elif 'play.google' in host:
-                    res = await parse_from_url(link)
+                    res = await parse_from_url(link, full_search=full_search)
                 else:
                     res = await chrome_parse(link)
 
                 stream = io.StringIO()
                 res = save_json_to_csv(res, stream)
-                print(res)
+                #print(res)
                 return web.json_response(
                     data=res,
                     status=200 if res.get('ok') else 200
@@ -61,7 +62,7 @@ def make_app() -> web.Application:
     """Creates app
 
     This function creates new app instance. We create new Application instance
-    on every call because it's needed for tests.
+    on every call because it's needed for tests and for gunicorn.
 
     Returns:
         web.Application
@@ -73,6 +74,11 @@ def make_app() -> web.Application:
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
     app.add_routes(routes)
     return app
+
+
+async def get_gunicorn_app_instance():
+    """Gunicorn's entry point."""
+    return make_app()
 
 
 if __name__ == '__main__':

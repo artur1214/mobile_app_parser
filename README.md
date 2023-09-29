@@ -2,20 +2,28 @@
 
 ## Installation:
 
-### 1. install python3 (**VERSION 3.9+ IS NEEDED**): 
+### 1. Install python3 (**VERSION 3.9+ IS NEEDED**): 
 https://www.python.org/
 
-### 2. clone project:
+### 2. Clone project:
 
 ```shell
 git clone git@gitlab.com:Tanat77/app-parser.git
 cd app-parser
 ```
 
-### 3. install requirements:
+### 3. Install requirements:
 
 ```shell
 pip install -R requirements.txt
 ```
-## INSTALLATION VIA VENV:
+
+### 4. Run Project
+
+```shell
+python server.py
+```
+## Run via docker:
+
+Docker 
 

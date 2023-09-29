@@ -19,7 +19,7 @@ MAPPINGS = {
     'installs': [0, 23],
     'details': {
         'path': [0, 46],
-        'fun': lambda url: 'https://chrome.google.com' + url
+        'fun': lambda url: 'https://chrome.google.com' + (url or '')
     },
     'developer_site': [0, 81],
     'description': [1],
@@ -37,7 +37,8 @@ MAPPINGS = {
 }
 
 
-async def parse_app(_id: str, lang='en', country='US'):
+async def parse_app(_id: str, lang: str = utils.DEFAULT_CHROME_LANG,
+                    country: str = utils.DEFAULT_CHROME_COUNTRY):
     res = await utils.post_page(
         'https://chrome.google.com/webstore/ajax/detail?'
         f'hl={lang}&gl={country}'

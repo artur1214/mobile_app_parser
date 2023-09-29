@@ -1,6 +1,6 @@
 """Server parser tests. """
 from aiohttp.test_utils import AioHTTPTestCase
-from main import make_app
+from server import make_app
 
 
 class MyAppTestCase(AioHTTPTestCase):
