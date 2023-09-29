@@ -9,7 +9,7 @@ from io import StringIO
 from typing import Any, TextIO
 
 import asyncio
-from urllib.parse import quote, urlparse, parse_qs
+from urllib.parse import quote, urlparse, parse_qs, urlencode, urlunparse
 
 import cytoolz
 from _jsonnet import evaluate_snippet
@@ -219,6 +219,12 @@ async def parse_from_url(url: str, stream_to: IO | None = None, **kwargs):
     random.shuffle(codes)
     to_process = []
     provided_code = parse_qs(urlparse(url).query).get('gl', ['us', 'ca'])
+    parsed_url = urlparse(url)
+    url_params = parse_qs(parsed_url.query)
+    if 'gl' in url_params:
+        url_params.pop('gl')
+    url = parsed_url._replace(query=urlencode(url_params, True))
+    url = urlunparse(url)
     search_codes = [*IMPORTANT_CODES, *codes[:30]] if full_search else provided_code
 
     if detail := url.split('details?'):
