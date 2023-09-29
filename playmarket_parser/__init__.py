@@ -210,18 +210,20 @@ async def parse_urls(url: str | list[str], **opts):
         print('ERRR:', e)
         return []
 
-async def parse_from_url(url: str, stream_to: IO | None = None):
+async def parse_from_url(url: str, stream_to: IO | None = None, **kwargs):
+    full_search = kwargs.get('full_search', False)
     prev = []
     codes = COUNTRY_CODES[:200]
     random.shuffle(codes)
     to_process = []
+    search_codes = [*IMPORTANT_CODES, *codes[:30]] if full_search else ['us', 'ca']
     if detail := url.split('details?'):
         if len(detail) > 1:
             url = detail[-1].split('id=')[-1].replace('/', '')
             parsed = [await get_app_info(url)]
             parsed = list(filter(None, parsed))
             return parsed
-    for code in [*IMPORTANT_CODES, *codes[:30]]:
+    for code in search_codes:
         print(code)
 
         to_process.append(parse_urls(url+f'&gl={code}', country=code))

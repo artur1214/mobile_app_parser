@@ -27,6 +27,7 @@ class IndexView(web.View):
     async def post(self):
         """POST request handler"""
         data = await self.request.post()
+        full_search = data.get('full_search', False)
         if link := data.get('link'):
             try:
                 host = urllib.parse.urlparse(link).netloc
@@ -34,7 +35,7 @@ class IndexView(web.View):
                     res = await parse_apple(link)
                 # result = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
                 elif 'play.google' in host:
-                    res = await parse_from_url(link)
+                    res = await parse_from_url(link, full_search=full_search)
                 else:
                     res = await chrome_parse(link)
 
@@ -76,7 +77,7 @@ def make_app() -> web.Application:
 
 
 async def get_gunicorn_app_instance():
-    """Gunicorn entry point."""
+    """Gunicorn's entry point."""
     return make_app()
 
 
