@@ -13,6 +13,7 @@ from urllib.parse import quote, urlparse, parse_qs
 
 import cytoolz
 from _jsonnet import evaluate_snippet
+
 try:
     from typing import IO
 except (ImportError, ModuleNotFoundError):  # For compatibility with old python
@@ -70,9 +71,9 @@ async def check_finished(saved_apps: list[dict[str, Any]] | None,
     if not token:
         return saved_apps or []
     default_opts = {
-            'term': 'sport',
-            'lang': 'en',
-            'country': 'us',
+        'term': 'sport',
+        'lang': 'en',
+        'country': 'us',
     }
     for opt in opts:
         default_opts[opt] = opts[opt]
@@ -210,13 +211,16 @@ async def parse_urls(url: str | list[str], **opts):
         print('ERRR:', e)
         return []
 
+
 async def parse_from_url(url: str, stream_to: IO | None = None, **kwargs):
     full_search = kwargs.get('full_search', False)
     prev = []
     codes = COUNTRY_CODES[:200]
     random.shuffle(codes)
     to_process = []
-    search_codes = [*IMPORTANT_CODES, *codes[:30]] if full_search else ['us', 'ca']
+    provided_code = parse_qs(urlparse(url).query).get('gl', ['us', 'ca'])
+    search_codes = [*IMPORTANT_CODES, *codes[:30]] if full_search else provided_code
+
     if detail := url.split('details?'):
         if len(detail) > 1:
             url = detail[-1].split('id=')[-1].replace('/', '')
@@ -224,9 +228,7 @@ async def parse_from_url(url: str, stream_to: IO | None = None, **kwargs):
             parsed = list(filter(None, parsed))
             return parsed
     for code in search_codes:
-        print(code)
-
-        to_process.append(parse_urls(url+f'&gl={code}', country=code))
+        to_process.append(parse_urls(url + f'&gl={code}', country=code))
     prev = await asyncio.gather(*to_process)
     prev = list(itertools.chain(*prev))
 
@@ -501,7 +503,10 @@ IMPORTANT_CODES = [
 ]
 if __name__ == '__main__':
     async def main():
-        res = await parse_from_url('https://play.google.com/store/search?q=browser&c=apps')
+        res = await parse_from_url(
+            'https://play.google.com/store/search?q=browser&c=apps')
         save_json_to_csv(res, open('main_test.csv', 'w+'))
         json.dump(res, open('main_test.json', 'w+'))
+
+
     asyncio.run(main())
